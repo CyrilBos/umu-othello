@@ -1,0 +1,15 @@
+#!/bin/bash
+
+# Example script for the Othello assignment. Don't forget to make it executable (chmod +x othello)
+# Change the last line (java Othello ...) to suit your needs
+# usage: othello position time_limit
+#
+# Author: Ola Ringdahl
+
+# Change directory to the location of your java program (src folder in this case)
+# $(dirname "$0") is the path to where this script is located
+cd "$(dirname "$0")/src"
+
+# Call your Java program ($1 and $2 are the input parameters):
+java Othello $1 $2
+# or java -jar Othello.jar $1 $2

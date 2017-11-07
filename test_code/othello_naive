@@ -1,0 +1,10 @@
+#!/bin/bash
+# Script for the Othello example program that you should beat. Don't forget to make it executable (chmod +x othello)
+# Note that this program does not use the time parameter, but always use depth 7 (to be easier to beat)
+
+# usage: othello position 
+# change directory to the location of this script
+cd "$(dirname "$0")"
+
+# run the example program (disregards the time parameter)
+java Othello $1
