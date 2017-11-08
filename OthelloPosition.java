@@ -11,7 +11,7 @@ import java.lang.*;
 public class OthelloPosition {
     /**
      * An array used to get an opposite direction, which are row and column differences from the central cell.
-     * Used by addPossibleMove(), used by getMoves()
+     * Used by isAPossibleMove(), used by getMoves()
      */
     protected static final int[] OPPOSITE_DIRECTION_VALUES = {1, 0, -1};
 
@@ -103,6 +103,8 @@ public class OthelloPosition {
          * TODO: write the code for this method and whatever helper methods it
 		 * needs
 		 */
+		//TODO: graph representation instead ? or just graph functions (getNeigbors) from the board matrix
+
         LinkedList<OthelloAction> moves = new LinkedList<>();
 
         char playerToken = getPlayerToken(playerToMove);
@@ -110,16 +112,24 @@ public class OthelloPosition {
 
         //for every cell
         for (int row = 1; row <= BOARD_SIZE; row++) {
-            for (int col = 1; col <= BOARD_SIZE; col++) {
+            for (int column = 1; column <= BOARD_SIZE; column++) {
                 //if the cell contains an opponent token
-                if (board[row][col] == opponentToken) {
+                if (board[row][column] == opponentToken) {
                     //for every cell adjacent to the opponent token
                     for (int rowDifference = -1; rowDifference <= 1; rowDifference++) {
                         for (int columnDifference = -1; columnDifference <= 1; columnDifference++) {
                             //if an adjacent cell is empty
-                            if (board[row - rowDifference][col - columnDifference] == 'E') {
-                                //check if there a possible move in the opposite direction move and add it
-                                addPossibleMove(moves, playerToken, row, col);
+                            int testedRow = row - rowDifference;
+                            int testedColumn = column - columnDifference;
+                            if (isInsideBoard(testedRow) && isInsideBoard(testedColumn) && board[testedRow][testedColumn] == 'E') {
+                                //check if there a possible move in the opposite direction move
+                                if (isAPossibleMove(playerToken, row, column, rowDifference, columnDifference)) {
+                                    OthelloAction possibleAction = new OthelloAction(testedRow, testedColumn);
+
+                                    //if it does not already exist, add it to the possible moves
+                                    if(!moves.contains(possibleAction))
+                                        moves.add(possibleAction);
+                                }
                             }
                         }
                     }
@@ -147,44 +157,35 @@ public class OthelloPosition {
     }
 
     /**
-     * Method that returns if incrementing the value current by increment makes current still inside the board.
+     * Method that returns if the parameter index is inside the board.
      *
      */
-    private boolean isInsideBoard(int increment, int current) throws IllegalArgumentException {
-        switch (increment) {
-            case 1:
-                return current <= BOARD_SIZE;
-            case 0:
-                return true;
-            case -1:
-                return current > 1;
-            default:
-                throw new IllegalArgumentException("isInsideBoard() called with wrong increment: " + increment);
-        }
+    private boolean isInsideBoard(int index) throws IllegalArgumentException {
+        return index <= BOARD_SIZE && index >= 1;
     }
 
 
-    private void addPossibleMove(LinkedList<OthelloAction> moves, char player_char, int row, int col) {
-        boolean stop_condition = false;
+    private boolean isAPossibleMove(char player_char, int row, int column, int rowDifference, int columnDifference) {
+        int[] oppositeDirections = getOppositeDirection(rowDifference, columnDifference);
+        int searchRow = row + oppositeDirections[0];
+        int searchColumn = column + oppositeDirections[1];
 
-        int[] opposite_direction = getOppositeDirection(row, col);
-        int search_row = row + opposite_direction[0];
-        int search_col = col + opposite_direction[1];
-        // TODO: replace by whiles and change isInsideBoard by removing increment parameter?
-        // To use isInsideBoard in makeMove
-        for (; isInsideBoard(search_row, opposite_direction[0]) && !stop_condition; search_row += opposite_direction[0]) {
-            for (; isInsideBoard(search_col, opposite_direction[1]) && !stop_condition; search_col += opposite_direction[1]) {
-                if (board[search_row][search_col] == 'E') {
-                    stop_condition = true;
-                } else if (board[search_row][search_col] == player_char) {
-                    stop_condition = true;
-                    OthelloAction action = new OthelloAction(row, col);
-                    if (!moves.contains(action)) {
-                        moves.add(action);
-                    }
+        char searchCell;
+
+        while (isInsideBoard(searchRow)) {
+            while (isInsideBoard(searchColumn)) {
+                searchCell = board[searchRow][searchColumn];
+                if (searchCell == 'E') {
+                    return false;
                 }
+                else if (searchCell == player_char) {
+                    return true;
+                }
+                searchColumn += oppositeDirections[1];
             }
+            searchRow += oppositeDirections[0];
         }
+        return false;
     }
 
 	/* toMove */
@@ -247,8 +248,8 @@ public class OthelloPosition {
                     }
                     //if the last cell is the playerToMove token, capture all the tokens in between
                     if (board[currentRow][currentColumn] == playerToken) {
-                        for (int i = startRow; isInsideBoard(rowDifference, i) ; i+=rowDifference) {
-                            for (int j = startColumn; isInsideBoard(columnDifference, j); j+=columnDifference) {
+                        for (int i = startRow; isInsideBoard(i); i+=rowDifference) {
+                            for (int j = startColumn; isInsideBoard(j); j+=columnDifference) {
                                 board[i][j] = playerToken;
                             }
                         }
