@@ -1,5 +1,3 @@
-import jdk.nashorn.internal.runtime.regexp.joni.exception.ValueException;
-
 import java.util.*;
 import java.lang.*;
 
@@ -12,11 +10,10 @@ import java.lang.*;
 
 public class OthelloPosition {
     /**
-     * An array to get an opposite direction, which are row and column differences from the central cell.
-     * Used by addPossibleMoves(), used by getMoves()
+     * An array used to get an opposite direction, which are row and column differences from the central cell.
+     * Used by addPossibleMove(), used by getMoves()
      */
-    protected static final int opposite_direction_value[] = {1, 0, -1};
-
+    protected static final int[] OPPOSITE_DIRECTION_VALUES = {1, 0, -1};
 
     /**
      * For a normal Othello game, BOARD_SIZE is 8.
@@ -106,23 +103,23 @@ public class OthelloPosition {
          * TODO: write the code for this method and whatever helper methods it
 		 * needs
 		 */
-        LinkedList<OthelloAction> moves = new LinkedList<OthelloAction>();
-        char player_char = 'W';
-        char other_char = 'B';
-        if (!playerToMove) {
-            player_char = 'B'; //if player is black, we want to focus on white tokens
-            other_char = 'W';
-        }
-        //for every other player token
-        for (int row = 1; row < BOARD_SIZE; row++) {
-            for (int col = 1; col < BOARD_SIZE; col++) {
-                if (board[row][col] == other_char) {
-                    //for every cell adjacent to the other player token
-                    for (int row_difference = -1; row_difference <= 1; row_difference++) {
-                        for (int col_difference = -1; col_difference <= 1; col_difference++) {
-                            //if a cell is empty, check if there is a possible move
-                            if (board[row - row_difference][col - col_difference] == 'E') {
-                                addPossibleMoves(moves, player_char, row, col);
+        LinkedList<OthelloAction> moves = new LinkedList<>();
+
+        char playerToken = getPlayerToken(playerToMove);
+        char opponentToken = getPlayerToken(!playerToMove);
+
+        //for every cell
+        for (int row = 1; row <= BOARD_SIZE; row++) {
+            for (int col = 1; col <= BOARD_SIZE; col++) {
+                //if the cell contains an opponent token
+                if (board[row][col] == opponentToken) {
+                    //for every cell adjacent to the opponent token
+                    for (int rowDifference = -1; rowDifference <= 1; rowDifference++) {
+                        for (int columnDifference = -1; columnDifference <= 1; columnDifference++) {
+                            //if an adjacent cell is empty
+                            if (board[row - rowDifference][col - columnDifference] == 'E') {
+                                //check if there a possible move in the opposite direction move and add it
+                                addPossibleMove(moves, playerToken, row, col);
                             }
                         }
                     }
@@ -133,35 +130,50 @@ public class OthelloPosition {
         return moves;
     }
 
+    private char getPlayerToken(boolean playerToMove) {
+        if(playerToMove) {
+            return 'W';
+        }
+        else {
+            return 'B';
+        }
+    }
+
     private int[] getOppositeDirection(int row_difference, int col_difference) {
-        int[] opposite = new int[];
-        opposite[0] = opposite_direction_value[row_difference + 1];
-        opposite[1] = opposite_direction_value[col_difference + 1];
+        int[] opposite = new int[2];
+        opposite[0] = OPPOSITE_DIRECTION_VALUES[row_difference + 1];
+        opposite[1] = OPPOSITE_DIRECTION_VALUES[col_difference + 1];
         return opposite;
     }
 
-    private boolean getSearchCondition(int increment, int current) throws IllegalArgumentException {
+    /**
+     * Method that returns if incrementing the value current by increment makes current still inside the board.
+     *
+     */
+    private boolean isInsideBoard(int increment, int current) throws IllegalArgumentException {
         switch (increment) {
             case 1:
-                return current < BOARD_SIZE;
+                return current <= BOARD_SIZE;
             case 0:
                 return true;
             case -1:
                 return current > 1;
+            default:
+                throw new IllegalArgumentException("isInsideBoard() called with wrong increment: " + increment);
         }
-
-        throw new IllegalArgumentException("getSearchCondition() called with wrong increment");
     }
 
 
-    private void addPossibleMoves(LinkedList<OthelloAction> moves, char player_char, int row, int col) {
+    private void addPossibleMove(LinkedList<OthelloAction> moves, char player_char, int row, int col) {
         boolean stop_condition = false;
 
         int[] opposite_direction = getOppositeDirection(row, col);
         int search_row = row + opposite_direction[0];
         int search_col = col + opposite_direction[1];
-        for (; getSearchCondition(search_row, opposite_direction[0]) && !stop_condition; search_row += opposite_direction[0]) {
-            for (; getSearchCondition(search_col, opposite_direction[1]) && !stop_condition; search_col += opposite_direction[1]) {
+        // TODO: replace by whiles and change isInsideBoard by removing increment parameter?
+        // To use isInsideBoard in makeMove
+        for (; isInsideBoard(search_row, opposite_direction[0]) && !stop_condition; search_row += opposite_direction[0]) {
+            for (; isInsideBoard(search_col, opposite_direction[1]) && !stop_condition; search_col += opposite_direction[1]) {
                 if (board[search_row][search_col] == 'E') {
                     stop_condition = true;
                 } else if (board[search_row][search_col] == player_char) {
@@ -198,7 +210,53 @@ public class OthelloPosition {
          * TODO: write the code for this method and whatever helper functions it
 		 * needs.
 		 */
-        OthelloPosition movedPosition = new OthelloPosition();
+
+        //check if making a move on the board
+		if (action.row < 1 || action.row > BOARD_SIZE || action.column < 1 || action.column > BOARD_SIZE) {
+            throw new IllegalMoveException(action);
+        }
+
+        //check if making a move on an empty cell
+        char moveCell = board[action.row][action.column];
+        if (moveCell != 'E') {
+            throw new IllegalMoveException(action);
+        }
+        //legal action
+        OthelloPosition movedPosition = this.clone();
+
+        char playerToken = getPlayerToken(playerToMove);
+        char opponentToken = getPlayerToken(!playerToMove);
+
+
+        board[action.row][action.column] = getPlayerToken(playerToMove);
+        for (int rowDifference = -1; rowDifference <= 1; rowDifference++) {
+            for (int columnDifference = -1; columnDifference <= 1; columnDifference++) {
+                int startRow = action.row+rowDifference;
+                int startColumn = action.column+columnDifference;
+
+                int currentRow = startRow;
+                int currentColumn = startColumn;
+
+                char startCell = board[currentRow][currentColumn];
+                //if the cell is empty or if it is the playerToMove token, then there is nothing to do
+                if (startCell != 'E' && startCell != playerToken) {
+                    //else loop through all opponent tokens
+                    while(board[currentRow][currentColumn] == opponentToken) {
+                        currentRow++;
+                        currentColumn++;
+                    }
+                    //if the last cell is the playerToMove token, capture all the tokens in between
+                    if (board[currentRow][currentColumn] == playerToken) {
+                        for (int i = startRow; isInsideBoard(rowDifference, i) ; i+=rowDifference) {
+                            for (int j = startColumn; isInsideBoard(columnDifference, j); j+=columnDifference) {
+                                board[i][j] = playerToken;
+                            }
+                        }
+                    }
+                    //else it is an empty cell so no token to capture
+                }
+            }
+        }
 
 
         playerToMove = !playerToMove;
