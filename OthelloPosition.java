@@ -119,8 +119,8 @@ public class OthelloPosition {
                     for (int rowDifference = -1; rowDifference <= 1; rowDifference++) {
                         for (int columnDifference = -1; columnDifference <= 1; columnDifference++) {
                             //if an adjacent cell is empty
-                            int testedRow = row - rowDifference;
-                            int testedColumn = column - columnDifference;
+                            int testedRow = row + rowDifference;
+                            int testedColumn = column + columnDifference;
                             if (isInsideBoard(testedRow) && isInsideBoard(testedColumn) && board[testedRow][testedColumn] == 'E') {
                                 //check if there a possible move in the opposite direction move
                                 if (isAPossibleMove(playerToken, row, column, rowDifference, columnDifference)) {
@@ -213,7 +213,7 @@ public class OthelloPosition {
 		 */
 
         //check if making a move on the board
-		if (action.row < 1 || action.row > BOARD_SIZE || action.column < 1 || action.column > BOARD_SIZE) {
+		if (!isInsideBoard(action.row) || !isInsideBoard(action.column)) {
             throw new IllegalMoveException(action);
         }
 
@@ -229,15 +229,18 @@ public class OthelloPosition {
         char opponentToken = getPlayerToken(!playerToMove);
 
 
-        board[action.row][action.column] = getPlayerToken(playerToMove);
+        board[action.row][action.column] = playerToken;
+        //for every direction, check if one there is one of the playerToMove token
         for (int rowDifference = -1; rowDifference <= 1; rowDifference++) {
             for (int columnDifference = -1; columnDifference <= 1; columnDifference++) {
+                //
                 int startRow = action.row+rowDifference;
                 int startColumn = action.column+columnDifference;
 
                 int currentRow = startRow;
                 int currentColumn = startColumn;
 
+                //
                 char startCell = board[currentRow][currentColumn];
                 //if the cell is empty or if it is the playerToMove token, then there is nothing to do
                 if (startCell != 'E' && startCell != playerToken) {
@@ -246,10 +249,17 @@ public class OthelloPosition {
                         currentRow++;
                         currentColumn++;
                     }
-                    //if the last cell is the playerToMove token, capture all the tokens in between
+                    //if the last cell is the playerToMove token, convert all the tokens in between
                     if (board[currentRow][currentColumn] == playerToken) {
-                        for (int i = startRow; isInsideBoard(i); i+=rowDifference) {
-                            for (int j = startColumn; isInsideBoard(j); j+=columnDifference) {
+                        int i = startRow;
+                        int j = startColumn;
+                        while (isInsideBoard(i) && board[i][j] == opponentToken) {
+                            while (isInsideBoard(j) && board[i][j] == opponentToken) {
+                                board[i][j] = playerToken;
+                            }
+                        }
+                        for (int i = startRow; isInsideBoard(i) && boa; i+=rowDifference) {
+                            for (int j = startColumn; isInsideBoard(j) && ; j+=columnDifference) {
                                 board[i][j] = playerToken;
                             }
                         }
