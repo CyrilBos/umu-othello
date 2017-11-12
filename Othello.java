@@ -2,44 +2,38 @@ import java.util.LinkedList;
 
 public class Othello {
     public static void main(String[] args) throws IllegalMoveException {
+        long startTime = System.currentTimeMillis();
+
+        String positionString = args[0];
+        OthelloPosition position = new OthelloPosition(positionString);
+
+        long remainingTime = (long) Integer.parseInt(args[1]);
+
         OthelloAlgorithm moveChooser = new AlphaBeta();
-
-        OthelloEvaluator evaluator = new NaiveCountingEvaluator();
-
-        moveChooser.setSearchDepth(7);
+        //OthelloEvaluator evaluator = new NaiveCountingEvaluator();
+        OthelloEvaluator evaluator = new BetterCountingEvaluator();
         moveChooser.setEvaluator(evaluator);
 
-        //String position = args[1];
-        //int timeLimit = Integer.parseInt(args[2]);
-        //OthelloPosition position = new OthelloPosition(position);
-        //
+        int depth = 7;
+        moveChooser.setSearchDepth(depth);
 
-        OthelloPosition position = new OthelloPosition();
-        LinkedList<OthelloAction> moves;
+        OthelloAction move = moveChooser.evaluate(position);
+        long execTime = System.currentTimeMillis() - startTime;
+        remainingTime = remainingTime - execTime;
 
-        position.initialize();
-        do {
-            System.out.println("Current player: " + position.getPlayerToken(position.playerToMove));
-            position.illustrate();
-            position = position.makeMove(moveChooser.evaluate(position));
-            moves = position.getMoves();
-        } while (!moves.isEmpty());
+        //Stop the search if the remaining time
+        while (remainingTime > execTime) {
+            startTime = System.currentTimeMillis();
 
-            //moves is empty: the game is finished
+            //search again with an incremented depth to find a supposedly better move
+            moveChooser.setSearchDepth(depth++);
+            move = moveChooser.evaluate(position);
 
-        int white_tokens = 0;
-        int black_tokens = 0;
-
-        for (char[] row : position.board) {
-            for (char column : row) {
-                if(column == 'W')
-                    white_tokens++;
-                else if (column == 'B')
-                    black_tokens++;
-            }
+            execTime = System.currentTimeMillis() - startTime;
+            remainingTime = remainingTime - execTime;
         }
 
-        System.out.println("White tokens: " + white_tokens);
-        System.out.println("Black tokens: " + black_tokens);
+        move.print();
+
     }
 }

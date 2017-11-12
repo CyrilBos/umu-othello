@@ -239,6 +239,9 @@ public class OthelloPosition {
         char opponentToken = getPlayerToken(!playerToMove);
 
         movedPosition.board[action.row][action.column] = playerToken;
+
+        boolean movedSomething = false;
+
         //for every direction, check if one there is one of the playerToMove token
         for (int rowDifference = -1; rowDifference <= 1; rowDifference++) {
             for (int columnDifference = -1; columnDifference <= 1; columnDifference++) {
@@ -263,18 +266,22 @@ public class OthelloPosition {
                                 int i = startRow;
                                 int j = startColumn;
                                 while (isInsideBoard(i, j) && board[i][j] == opponentToken) {
+                                    movedSomething = true;
                                     movedPosition.board[i][j] = playerToken;
                                     i += rowDifference;
                                     j += columnDifference;
                                 }
                             }
-                            //else it is an empty cell so no token to capture
+                            //else it is an empty cell, so not a possible move
+
                         }
                     }
                 }
             }
         }
-
+        if (!movedSomething) {
+            throw new IllegalMoveException(action);
+        }
         movedPosition.playerToMove = !playerToMove;
         return movedPosition;
     }
