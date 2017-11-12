@@ -87,6 +87,10 @@ public class OthelloPosition {
         board[BOARD_SIZE / 2][BOARD_SIZE / 2] = board[BOARD_SIZE / 2 + 1][BOARD_SIZE / 2 + 1] = 'W';
         board[BOARD_SIZE / 2][BOARD_SIZE / 2 + 1] = board[BOARD_SIZE / 2 + 1][BOARD_SIZE / 2] = 'B';
         playerToMove = true;
+        //TODO: REMOVE
+        /*board[BOARD_SIZE / 2][BOARD_SIZE / 2] = board[BOARD_SIZE / 2 + 1][BOARD_SIZE / 2 + 1] = 'B';
+        board[BOARD_SIZE / 2][BOARD_SIZE / 2 + 1] = board[BOARD_SIZE / 2 + 1][BOARD_SIZE / 2] = 'W';
+        playerToMove = false;*/
     }
 
 	/* getMoves and helper functions */
@@ -103,7 +107,6 @@ public class OthelloPosition {
          * TODO: write the code for this method and whatever helper methods it
 		 * needs
 		 */
-        //TODO: graph representation instead ? or just graph functions (getNeigbors) from the board matrix
 
         LinkedList<OthelloAction> moves = new LinkedList<>();
 
@@ -142,7 +145,7 @@ public class OthelloPosition {
         return moves;
     }
 
-    private char getPlayerToken(boolean playerToMove) {
+    char getPlayerToken(boolean playerToMove) {
         if (playerToMove) {
             return 'W';
         } else {
@@ -158,7 +161,8 @@ public class OthelloPosition {
     }
 
     /**
-     * Method that returns if the parameter index is inside the board.
+     * Method that returns if the parameter index is inside the board. Used when modifying board indexes with both
+     * negative or positive values.
      */
     private boolean isInsideBoard(int index) {
         return index <= BOARD_SIZE && index >= 1;
@@ -169,24 +173,28 @@ public class OthelloPosition {
     }
 
 
-    private boolean isAPossibleMove(char player_char, int row, int column, int rowDifference, int columnDifference) {
-        //get the opposite direction to
+    private boolean isAPossibleMove(char playerChar, int row, int column, int rowDifference, int columnDifference) {
+        //get the opposite direction to the current position
         int[] oppositeDirections = getOppositeDirection(rowDifference, columnDifference);
+
         int searchRow = row + oppositeDirections[0];
         int searchColumn = column + oppositeDirections[1];
 
-        char  searchCell = board[searchRow][searchColumn];
-
         while (isInsideBoard(searchRow, searchColumn)) {
-                searchCell = board[searchRow][searchColumn];
-                if (searchCell == 'E') {
-                    return false;
-                } else if (searchCell == player_char) {
-                    return true;
-                }
+            char searchCell = board[searchRow][searchColumn];
+            //if we find one of the player token, then it is a possible move
+            if (searchCell == playerChar) {
+                return true;
+            }
+            //if we find an empty cell, it is not a possible move
+            else if (searchCell == 'E') {
+                return false;
+            }
+            //else it is an opponent token, so we need to check further (unless it is outside the board)
             searchColumn += oppositeDirections[1];
             searchRow += oppositeDirections[0];
         }
+        //line full of opponent tokens
         return false;
     }
 
@@ -234,7 +242,7 @@ public class OthelloPosition {
         //for every direction, check if one there is one of the playerToMove token
         for (int rowDifference = -1; rowDifference <= 1; rowDifference++) {
             for (int columnDifference = -1; columnDifference <= 1; columnDifference++) {
-                if(!(rowDifference == 0 && columnDifference == 0)) {
+                if (!(rowDifference == 0 && columnDifference == 0)) {
                     int startRow = action.row + rowDifference;
                     int startColumn = action.column + columnDifference;
 

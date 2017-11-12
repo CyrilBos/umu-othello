@@ -22,7 +22,7 @@ public interface OthelloAlgorithm {
 	 * Returns the <code>OthelloAction</code> the algorithm considers to be the
 	 * best move.
 	 */
-	public OthelloAction evaluate(OthelloPosition position);
+	public OthelloAction evaluate(OthelloPosition position) throws IllegalMoveException;
 
 	/** Sets the maximum search depth of the algorithm. */
 	public void setSearchDepth(int depth);
