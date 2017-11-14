@@ -2,7 +2,7 @@ import java.util.LinkedList;
 
 public class AlphaBeta implements OthelloAlgorithm {
     private OthelloEvaluator evaluator;
-    private int depth, max_depth;
+    private int max_depth;
 
     @Override
     public void setEvaluator(OthelloEvaluator evaluator) {
@@ -21,10 +21,11 @@ public class AlphaBeta implements OthelloAlgorithm {
         return MaxValue(null, position, alpha, beta, depth);
     }
 
-    public OthelloAction MaxValue(OthelloAction callingMove, OthelloPosition position, int alpha, int beta, int depth) throws IllegalMoveException {
+    private OthelloAction MaxValue(OthelloAction callingMove, OthelloPosition position, int alpha, int beta, int depth) throws IllegalMoveException {
         LinkedList<OthelloAction> moves = position.getMoves();
         if (moves.isEmpty() || depth > max_depth) {
-            callingMove.setValue(evaluator.evaluate(position));
+            if(callingMove != null)
+                callingMove.setValue(evaluator.evaluate(position));
             return callingMove;
         }
         int value = Integer.MIN_VALUE;
@@ -43,7 +44,7 @@ public class AlphaBeta implements OthelloAlgorithm {
         return bestMove;
     }
 
-    public OthelloAction MinValue(OthelloAction callingMove, OthelloPosition position, int alpha, int beta, int depth) throws IllegalMoveException {
+    private OthelloAction MinValue(OthelloAction callingMove, OthelloPosition position, int alpha, int beta, int depth) throws IllegalMoveException {
         LinkedList<OthelloAction> moves = position.getMoves();
         if (moves.isEmpty() || depth > max_depth) {
             callingMove.setValue(evaluator.evaluate(position));
