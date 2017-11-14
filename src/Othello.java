@@ -25,10 +25,8 @@ public class Othello {
                 chosenMove = newMove;
             }
         }
-
         if (chosenMove == null)
             chosenMove = new OthelloAction(0,0,true);
         chosenMove.print();
-
     }
 }
