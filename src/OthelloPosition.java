@@ -173,7 +173,7 @@ public class OthelloPosition {
     }
 
 
-    private boolean isAPossibleMove(char playerChar, int row, int column, int rowDifference, int columnDifference) {
+    protected boolean isAPossibleMove(char playerChar, int row, int column, int rowDifference, int columnDifference) {
         //get the opposite direction to the current position
         int[] oppositeDirections = getOppositeDirection(rowDifference, columnDifference);
 

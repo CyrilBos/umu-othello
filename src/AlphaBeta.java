@@ -23,7 +23,6 @@ public class AlphaBeta implements OthelloAlgorithm {
     public OthelloAction evaluate(OthelloPosition position) throws IllegalMoveException {
         int depth = 1;
         int alpha = Integer.MIN_VALUE, beta = Integer.MAX_VALUE;
-        //TODO: if/else playerToMove Max/Min?
         if (position.playerToMove)
             return this.MaxValue(null, position, alpha, beta, depth);
         else
@@ -32,10 +31,9 @@ public class AlphaBeta implements OthelloAlgorithm {
 
     private OthelloAction MaxValue(OthelloAction callingMove, OthelloPosition position, int alpha, int beta, int depth) throws IllegalMoveException {
         LinkedList<OthelloAction> moves = position.getMoves();
-        //if a leaf is reached
+        //if a leaf position is reached
         if (moves.isEmpty() || depth > this.maxDepth) {
-            if (callingMove != null)
-                callingMove.setValue(evaluator.evaluate(position));
+            treatLeafPosition(callingMove, position);
             return callingMove;
         }
 
@@ -62,17 +60,49 @@ public class AlphaBeta implements OthelloAlgorithm {
         return bestMove;
     }
 
+    private void treatLeafPosition(OthelloAction callingMove, OthelloPosition position) {
+        if (callingMove != null) {
+            OthelloPosition evalPosition = position.clone();
+            evalPosition.playerToMove = !position.playerToMove;
+            //Check if the position is an ending move
+            if (position.getMoves().isEmpty() && evalPosition.getMoves().isEmpty()) {
+                int whiteNumber = 0;
+                int blackNumber = 0;
+                //get the total count of each player tokens
+                for (int row = 1; row <= OthelloPosition.BOARD_SIZE; row++) {
+                    for (int column = 1; column <= OthelloPosition.BOARD_SIZE; column++) {
+                        char cell = position.board[row][column];
+                        if (cell == 'W') {
+                            whiteNumber += 1;
+                        } else if (cell == 'B') {
+                            blackNumber += 1;
+                        }
+                    }
+                }
+                if (whiteNumber > blackNumber) {
+                    callingMove.setValue(Integer.MAX_VALUE);//White player wins. The white score is maximal
+                } else {
+                    callingMove.setValue(Integer.MIN_VALUE);//Black player wins. The white score is minimal
+                }
+            } else {
+                callingMove.setValue(evaluator.evaluate(position));
+            }
+        }
+    }
+
     private OthelloAction MinValue(OthelloAction callingMove, OthelloPosition position, int alpha, int beta, int depth) throws IllegalMoveException {
         LinkedList<OthelloAction> moves = position.getMoves();
         if (moves.isEmpty() || depth > this.maxDepth) {
-            if (callingMove != null)
-                callingMove.setValue(evaluator.evaluate(position));
+            treatLeafPosition(callingMove, position);
             return callingMove;
         }
 
         int value = Integer.MAX_VALUE;
         OthelloAction bestMove = null;
-        for (OthelloAction move : moves) {
+        for (
+                OthelloAction move : moves)
+
+        {
             if (System.currentTimeMillis() > timeLimitStamp)
                 return bestMove;
 
