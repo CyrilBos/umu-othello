@@ -1,7 +1,7 @@
 import java.util.LinkedList;
 
 public class AlphaBeta implements OthelloAlgorithm {
-    private OthelloEvaluator evaluator;
+    private OthelloEvaluator evaluator, min_evaluator, max_evaluator;
     private int maxDepth;
     private long timeLimitStamp;
 

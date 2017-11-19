@@ -110,15 +110,15 @@ public class OthelloPosition {
 
         LinkedList<OthelloAction> moves = new LinkedList<>();
 
-        char playerToken = getPlayerToken(playerToMove);
-        char opponentToken = getPlayerToken(!playerToMove);
+        char playerDisc = getPlayerDisc(playerToMove);
+        char opponentDisc = getPlayerDisc(!playerToMove);
 
         //for every cell
         for (int row = 1; row <= BOARD_SIZE; row++) {
             for (int column = 1; column <= BOARD_SIZE; column++) {
-                //if the cell contains an opponent token
-                if (board[row][column] == opponentToken) {
-                    //for every cell adjacent to the opponent token
+                //if the cell contains an opponent Disc
+                if (board[row][column] == opponentDisc) {
+                    //for every cell adjacent to the opponent disc
                     for (int rowDifference = -1; rowDifference <= 1; rowDifference++) {
                         for (int columnDifference = -1; columnDifference <= 1; columnDifference++) {
                             if (!(columnDifference == 0 && rowDifference == 0)) {
@@ -127,7 +127,7 @@ public class OthelloPosition {
                                 //if an adjacent cell is empty
                                 if (isInsideBoard(testedRow, testedColumn) && board[testedRow][testedColumn] == 'E') {
                                     //check if there a possible move in the opposite direction move
-                                    if (isAPossibleMove(playerToken, row, column, rowDifference, columnDifference)) {
+                                    if (isAPossibleMove(playerDisc, row, column, rowDifference, columnDifference)) {
                                         OthelloAction possibleAction = new OthelloAction(testedRow, testedColumn);
 
                                         //if, it does not already exist, add it to the possible moves
@@ -145,7 +145,10 @@ public class OthelloPosition {
         return moves;
     }
 
-    char getPlayerToken(boolean playerToMove) {
+    /**
+     * Method that returns the char corresponding to the playerToMove value.
+     */
+    char getPlayerDisc(boolean playerToMove) {
         if (playerToMove) {
             return 'W';
         } else {
@@ -153,10 +156,14 @@ public class OthelloPosition {
         }
     }
 
-    private int[] getOppositeDirection(int row_difference, int col_difference) {
+    /**
+     * Method that returns an array corresponding to the opposite direction, given in and given by a difference in row
+     * index and a difference in column index.
+     */
+    private int[] getOppositeDirection(int rowDifference, int columnDifference) {
         int[] opposite = new int[2];
-        opposite[0] = OPPOSITE_DIRECTION_VALUES[row_difference + 1];
-        opposite[1] = OPPOSITE_DIRECTION_VALUES[col_difference + 1];
+        opposite[0] = OPPOSITE_DIRECTION_VALUES[rowDifference + 1];
+        opposite[1] = OPPOSITE_DIRECTION_VALUES[columnDifference + 1];
         return opposite;
     }
 
@@ -168,12 +175,20 @@ public class OthelloPosition {
         return index <= BOARD_SIZE && index >= 1;
     }
 
-    private boolean isInsideBoard(int row_index, int column_index) {
-        return isInsideBoard(row_index) && isInsideBoard(column_index);
+    /**
+     * Method that returns if the indexes given as parameters are inside the board. Used when modifying board
+     * indexes with both negative or positive values.
+     */
+    private boolean isInsideBoard(int rowIndex, int columnIndex) {
+        return isInsideBoard(rowIndex) && isInsideBoard(columnIndex);
     }
 
-
-    protected boolean isAPossibleMove(char playerChar, int row, int column, int rowDifference, int columnDifference) {
+    /**
+     * Method that returns if a move is possible. It is called by getMoves() when it finds an opponent in the cell
+     * [row,column]. This method calculates the opposite direction and finds if there is a player token in that direction,
+     * making it a valid move.
+     */
+    boolean isAPossibleMove(char playerChar, int row, int column, int rowDifference, int columnDifference) {
         //get the opposite direction to the current position
         int[] oppositeDirections = getOppositeDirection(rowDifference, columnDifference);
 
@@ -194,7 +209,7 @@ public class OthelloPosition {
             searchColumn += oppositeDirections[1];
             searchRow += oppositeDirections[0];
         }
-        //line full of opponent tokens
+        //line full of opponent Discs
         return false;
     }
 
@@ -235,14 +250,14 @@ public class OthelloPosition {
         //legal action
         OthelloPosition movedPosition = this.clone();
 
-        char playerToken = getPlayerToken(playerToMove);
-        char opponentToken = getPlayerToken(!playerToMove);
+        char playerDisc = getPlayerDisc(playerToMove);
+        char opponentDisc = getPlayerDisc(!playerToMove);
 
-        movedPosition.board[action.row][action.column] = playerToken;
+        movedPosition.board[action.row][action.column] = playerDisc;
 
-        boolean movedSomething = false;
+        boolean discsWereConverted = false;
 
-        //for every direction, check if one there is one of the playerToMove token
+        //for every direction, check if one there is one of the playerToMove Disc
         for (int rowDifference = -1; rowDifference <= 1; rowDifference++) {
             for (int columnDifference = -1; columnDifference <= 1; columnDifference++) {
                 if (!(rowDifference == 0 && columnDifference == 0)) {
@@ -250,24 +265,25 @@ public class OthelloPosition {
                     int startColumn = action.column + columnDifference;
 
                     if (isInsideBoard(startRow, startColumn)) {
+                        //save indexes values for later
                         int currentRow = startRow;
                         int currentColumn = startColumn;
 
                         char startCell = board[currentRow][currentColumn];
-                        //if the cell is empty or if it is the playerToMove token, then there is nothing to do
-                        if (startCell != 'E' && startCell != playerToken) {
-                            //else loop through all opponent tokens
-                            while (isInsideBoard(currentRow, currentColumn) && board[currentRow][currentColumn] == opponentToken) {
+                        //if the cell is empty or if it is the playerToMove Disc, then there is nothing to do
+                        if (startCell != 'E' && startCell != playerDisc) {
+                            //else loop through all opponent Discs
+                            while (isInsideBoard(currentRow, currentColumn) && board[currentRow][currentColumn] == opponentDisc) {
                                 currentRow += rowDifference;
                                 currentColumn += columnDifference;
                             }
-                            //if the last cell is the playerToMove token, convert all the tokens in between
-                            if (isInsideBoard(currentRow, currentColumn) && board[currentRow][currentColumn] == playerToken) {
+                            //if the last cell is the playerToMove Disc, convert all the Discs in between
+                            if (isInsideBoard(currentRow, currentColumn) && board[currentRow][currentColumn] == playerDisc) {
                                 int i = startRow;
                                 int j = startColumn;
-                                while (isInsideBoard(i, j) && board[i][j] == opponentToken) {
-                                    movedSomething = true;
-                                    movedPosition.board[i][j] = playerToken;
+                                while (isInsideBoard(i, j) && board[i][j] == opponentDisc) {
+                                    discsWereConverted = true;
+                                    movedPosition.board[i][j] = playerDisc;
                                     i += rowDifference;
                                     j += columnDifference;
                                 }
@@ -279,7 +295,8 @@ public class OthelloPosition {
                 }
             }
         }
-        if (!movedSomething) {
+        //Illegal move if nothing was converted
+        if (!discsWereConverted) {
             throw new IllegalMoveException(action);
         }
         movedPosition.playerToMove = !playerToMove;
