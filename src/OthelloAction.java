@@ -121,4 +121,12 @@ public class OthelloAction {
 		}
 	}
 
+	public void pprint() {
+		if (pass) {
+			System.out.println("pass " + this.value);
+		} else {
+			System.out.println("(" + row + "," + column + ") " + this.value);
+		}
+	}
+
 }

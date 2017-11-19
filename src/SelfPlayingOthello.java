@@ -4,7 +4,7 @@ public class SelfPlayingOthello {
     public static void main(String[] args) throws IllegalMoveException {
         OthelloPosition position = new OthelloPosition();
         LinkedList<OthelloAction> moves;
-        OthelloAlgorithm moveChooser = new AlphaBeta();
+        OthelloAlgorithm moveChooser = new AlphaBeta(1);
         //OthelloEvaluator evaluator = new NaiveCountingEvaluator();
         OthelloEvaluator evaluator = new BetterCountingEvaluator();
         moveChooser.setEvaluator(evaluator);
@@ -13,7 +13,7 @@ public class SelfPlayingOthello {
 
         position.initialize();
         do {
-            System.out.println("Current player: " + position.getPlayerToken(position.playerToMove));
+            System.out.println("Current player: " + position.getPlayerDisc(position.playerToMove));
             position.illustrate();
             position = position.makeMove(moveChooser.evaluate(position));
             moves = position.getMoves();

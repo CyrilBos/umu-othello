@@ -4,7 +4,7 @@ public class NaiveCountingEvaluator implements OthelloEvaluator {
     @Override
     public int evaluate(OthelloPosition position) {
         int score = 0;
-        char playerToken = position.getPlayerToken(true);
+        char playerToken = position.getPlayerDisc(true);
 
         for(char[] row: position.board) {
             for(char cell: row) {

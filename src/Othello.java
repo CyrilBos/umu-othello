@@ -19,7 +19,7 @@ public class Othello {
         //Stop the search if the remaining time is inferior to the last search time
         while (System.currentTimeMillis() < timeLimitStamp) {
             //search again with an incremented depth to find a supposedly better move
-            moveChooser.setSearchDepth(depth++);
+            moveChooser.setSearchDepth(1);
             OthelloAction newMove = moveChooser.evaluate(position);
             if(newMove != null) {
                 chosenMove = newMove;
