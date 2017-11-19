@@ -21,12 +21,17 @@ public class AlphaBeta implements OthelloAlgorithm {
 
     @Override
     public OthelloAction evaluate(OthelloPosition position) throws IllegalMoveException {
-        int depth = 1;
         int alpha = Integer.MIN_VALUE, beta = Integer.MAX_VALUE;
-        if (position.playerToMove)
-            return this.MaxValue(position, alpha, beta, depth);
-        else
-            return this.MinValue(position, alpha, beta, depth);
+        if (position.playerToMove) {
+            this.min_evaluator = evaluator;//new NaiveCountingEvaluator();
+            this.max_evaluator = evaluator;
+            return this.MaxValue(position, alpha, beta, this.maxDepth);
+        }
+        else {
+            this.max_evaluator = evaluator;//new NaiveCountingEvaluator();
+            this.min_evaluator = evaluator;
+            return this.MinValue(position, alpha, beta, this.maxDepth);
+        }
     }
 
     private void treatLeafPosition(OthelloAction callingMove, OthelloPosition position) {
@@ -62,21 +67,17 @@ public class AlphaBeta implements OthelloAlgorithm {
     private OthelloAction MaxValue(OthelloPosition position, int alpha, int beta, int depth) throws IllegalMoveException {
         LinkedList<OthelloAction> moves = position.getMoves();
 
-        if (depth > this.maxDepth) {
+        if (depth == 0) {
             OthelloAction maxDepthMove = new OthelloAction(0, 0);
-            this.evaluator.evaluate(position);
+            this.max_evaluator.evaluate(position);
             //treatLeafPosition(callingMove, position);
-            System.out.println("MaxCallingMove");
-            maxDepthMove.pprint();
             return maxDepthMove;
         }
         //if a leaf position is reached
         else if (moves.isEmpty()) {
             OthelloAction leafMove = new OthelloAction(0, 0, true);
-            this.evaluator.evaluate(position);
+            this.max_evaluator.evaluate(position);
             //treatLeafPosition(callingMove, position);
-            System.out.println("LeafCallingMove");
-            leafMove.pprint();
             return leafMove;
         }
         else {
@@ -88,46 +89,35 @@ public class AlphaBeta implements OthelloAlgorithm {
 
                 OthelloPosition next_position = position.makeMove(move);
                 //if moveResult is null, there was a timeout
-                OthelloAction moveResult = MinValue(next_position, alpha, beta, depth + 1);
-                if (moveResult != null) {
+                OthelloAction moveResult = MinValue(next_position, alpha, beta, depth - 1);
                     if (moveResult.getValue() > value) {
                         value = moveResult.getValue();
                         move.value = value;
                         bestMove = move;
                     }
                     if (value >= beta) {
-                        System.out.println("BETA CUT");
-                        if (move != null)
-                            move.pprint();
                         return move;
                     }
 
                     alpha = Integer.max(alpha, value);
-                }
             }
-            System.out.println("MAXendBestMove");
-            bestMove.pprint();
             return bestMove;
         }
     }
 
     private OthelloAction MinValue(OthelloPosition position, int alpha, int beta, int depth) throws IllegalMoveException {
         LinkedList<OthelloAction> moves = position.getMoves();
-        if (depth > this.maxDepth) {
+        if (depth == 0) {
             OthelloAction maxDepthMove = new OthelloAction(0, 0);
-            maxDepthMove.value = this.evaluator.evaluate(position);
+            maxDepthMove.value = this.min_evaluator.evaluate(position);
             //treatLeafPosition(callingMove, position);
-            System.out.println("MaxCallingMove");
-            maxDepthMove.pprint();
             return maxDepthMove;
         }
         //if a leaf position is reached
         else if (moves.isEmpty()) {
             OthelloAction leafMove = new OthelloAction(0, 0, true);
-            leafMove.value = this.evaluator.evaluate(position);
+            leafMove.value = this.min_evaluator.evaluate(position);
             //treatLeafPosition(callingMove, position);
-            System.out.println("LeafCallingMove");
-            leafMove.pprint();
             return leafMove;
         }
         else {
@@ -139,7 +129,7 @@ public class AlphaBeta implements OthelloAlgorithm {
                     return bestMove;
 
                 OthelloPosition nextPosition = position.makeMove(move);
-                OthelloAction moveResult = MaxValue(nextPosition, alpha, beta, depth + 1);
+                OthelloAction moveResult = MaxValue(nextPosition, alpha, beta, depth - 1);
                 //if moveResult is null, there was a timeout
                 if (moveResult.getValue() < value) {
                     value = moveResult.getValue();
@@ -149,15 +139,11 @@ public class AlphaBeta implements OthelloAlgorithm {
 
                 if (value <= alpha) {
                     move.value = value;
-                    System.out.println("ALPHA CUT");
-                    move.pprint();
                     return move;
                 }
 
                 beta = Integer.min(beta, value);
             }
-            System.out.println("MINendBestMove");
-            bestMove.pprint();
             return bestMove;
         }
     }

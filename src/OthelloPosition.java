@@ -141,7 +141,6 @@ public class OthelloPosition {
                 }
             }
         }
-
         return moves;
     }
 
@@ -179,7 +178,7 @@ public class OthelloPosition {
      * Method that returns if the indexes given as parameters are inside the board. Used when modifying board
      * indexes with both negative or positive values.
      */
-    private boolean isInsideBoard(int rowIndex, int columnIndex) {
+    boolean isInsideBoard(int rowIndex, int columnIndex) {
         return isInsideBoard(rowIndex) && isInsideBoard(columnIndex);
     }
 
