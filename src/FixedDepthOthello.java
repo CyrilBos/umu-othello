@@ -12,7 +12,7 @@ public class FixedDepthOthello {
         OthelloEvaluator evaluator = new BetterCountingEvaluator();
         moveChooser.setEvaluator(evaluator);
 
-        int depth = 8;
+        int depth = 6;
         moveChooser.setSearchDepth(depth);
         OthelloAction chosenMove = moveChooser.evaluate(position);
         if (chosenMove == null)

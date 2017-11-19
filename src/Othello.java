@@ -14,7 +14,7 @@ public class Othello {
         OthelloEvaluator evaluator = new BetterCountingEvaluator();
         moveChooser.setEvaluator(evaluator);
 
-        int depth = 0;
+        int depth = 5;
         OthelloAction chosenMove = null;
         //Stop the search if the remaining time is inferior to the last search time
         while (System.currentTimeMillis() < timeLimitStamp) {
