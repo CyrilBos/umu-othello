@@ -24,9 +24,9 @@ public class AlphaBeta implements OthelloAlgorithm {
         int depth = 1;
         int alpha = Integer.MIN_VALUE, beta = Integer.MAX_VALUE;
         if (position.playerToMove)
-            return this.MaxValue(null, position, alpha, beta, depth);
+            return this.MaxValue(position, alpha, beta, depth);
         else
-            return this.MinValue(null, position, alpha, beta, depth);
+            return this.MinValue(position, alpha, beta, depth);
     }
 
     private void treatLeafPosition(OthelloAction callingMove, OthelloPosition position) {
@@ -59,91 +59,106 @@ public class AlphaBeta implements OthelloAlgorithm {
         }
     }
 
-    private OthelloAction MaxValue(OthelloAction callingMove, OthelloPosition position, int alpha, int beta, int depth) throws IllegalMoveException {
+    private OthelloAction MaxValue(OthelloPosition position, int alpha, int beta, int depth) throws IllegalMoveException {
         LinkedList<OthelloAction> moves = position.getMoves();
-        //if a leaf position is reached
+
         if (depth > this.maxDepth) {
-            treatLeafPosition(callingMove, position);
+            OthelloAction maxDepthMove = new OthelloAction(0, 0);
+            this.evaluator.evaluate(position);
+            //treatLeafPosition(callingMove, position);
             System.out.println("MaxCallingMove");
-            if (callingMove != null)
-                callingMove.print();
-            return callingMove;
+            maxDepthMove.pprint();
+            return maxDepthMove;
         }
+        //if a leaf position is reached
         else if (moves.isEmpty()) {
-
+            OthelloAction leafMove = new OthelloAction(0, 0, true);
+            this.evaluator.evaluate(position);
+            //treatLeafPosition(callingMove, position);
+            System.out.println("LeafCallingMove");
+            leafMove.pprint();
+            return leafMove;
         }
+        else {
+            int value = Integer.MIN_VALUE;
+            OthelloAction bestMove = new OthelloAction(0,0);
+            for (OthelloAction move : moves) {
+                if (System.currentTimeMillis() > timeLimitStamp)
+                    return bestMove;
 
-        int value = Integer.MIN_VALUE;
-        OthelloAction bestMove = null;
-        for (OthelloAction move : moves) {
-            if (System.currentTimeMillis() > timeLimitStamp)
-                return bestMove;
+                OthelloPosition next_position = position.makeMove(move);
+                //if moveResult is null, there was a timeout
+                OthelloAction moveResult = MinValue(next_position, alpha, beta, depth + 1);
+                if (moveResult != null) {
+                    if (moveResult.getValue() > value) {
+                        value = moveResult.getValue();
+                        move.value = value;
+                        bestMove = move;
+                    }
+                    if (value >= beta) {
+                        System.out.println("BETA CUT");
+                        if (move != null)
+                            move.pprint();
+                        return move;
+                    }
 
-            OthelloPosition next_position = position.makeMove(move);
-            //if moveResult is null, there was a timeout
-            OthelloAction moveResult = MinValue(move, next_position, alpha, beta, depth + 1);
-            if (moveResult != null) {
-                if (moveResult.getValue() > value) {
-                    value = moveResult.getValue();
-                    bestMove = move;
+                    alpha = Integer.max(alpha, value);
                 }
-                if (value >= beta) {
-                    System.out.println("BETA CUT");
-                    if (move != null)
-                        move.print();
-                    return move;
-                }
-
-                alpha = Integer.max(alpha, value);
             }
+            System.out.println("MAXendBestMove");
+            bestMove.pprint();
+            return bestMove;
         }
-        System.out.println("MAXendBestMove");
-        if (bestMove != null)
-            bestMove.print();
-        return bestMove;
     }
 
-    private OthelloAction MinValue(OthelloAction callingMove, OthelloPosition position, int alpha, int beta, int depth) throws IllegalMoveException {
+    private OthelloAction MinValue(OthelloPosition position, int alpha, int beta, int depth) throws IllegalMoveException {
         LinkedList<OthelloAction> moves = position.getMoves();
-        if (moves.isEmpty() || depth > this.maxDepth) {
-            treatLeafPosition(callingMove, position);
-            System.out.println("MINCallingMove");
-            if (callingMove != null)
-                callingMove.print();
-            return callingMove;
+        if (depth > this.maxDepth) {
+            OthelloAction maxDepthMove = new OthelloAction(0, 0);
+            maxDepthMove.value = this.evaluator.evaluate(position);
+            //treatLeafPosition(callingMove, position);
+            System.out.println("MaxCallingMove");
+            maxDepthMove.pprint();
+            return maxDepthMove;
         }
+        //if a leaf position is reached
+        else if (moves.isEmpty()) {
+            OthelloAction leafMove = new OthelloAction(0, 0, true);
+            leafMove.value = this.evaluator.evaluate(position);
+            //treatLeafPosition(callingMove, position);
+            System.out.println("LeafCallingMove");
+            leafMove.pprint();
+            return leafMove;
+        }
+        else {
 
-        int value = Integer.MAX_VALUE;
-        OthelloAction bestMove = null;
-        for (
-                OthelloAction move : moves)
+            int value = Integer.MAX_VALUE;
+            OthelloAction bestMove = new OthelloAction(0, 0);
+            for (OthelloAction move : moves) {
+                if (System.currentTimeMillis() > timeLimitStamp)
+                    return bestMove;
 
-        {
-            if (System.currentTimeMillis() > timeLimitStamp)
-                return bestMove;
-
-            OthelloPosition nextPosition = position.makeMove(move);
-            OthelloAction moveResult = MaxValue(move, nextPosition, alpha, beta, depth + 1);
-            //if moveResult is null, there was a timeout
-            if (moveResult != null) {
+                OthelloPosition nextPosition = position.makeMove(move);
+                OthelloAction moveResult = MaxValue(nextPosition, alpha, beta, depth + 1);
+                //if moveResult is null, there was a timeout
                 if (moveResult.getValue() < value) {
                     value = moveResult.getValue();
+                    move.value = value;
                     bestMove = move;
                 }
 
                 if (value <= alpha) {
+                    move.value = value;
                     System.out.println("ALPHA CUT");
-                    if (move != null)
-                        move.print();
+                    move.pprint();
                     return move;
                 }
 
                 beta = Integer.min(beta, value);
             }
+            System.out.println("MINendBestMove");
+            bestMove.pprint();
+            return bestMove;
         }
-        System.out.println("MINendBestMove");
-        if (bestMove != null)
-            bestMove.print();
-        return bestMove;
     }
 }
