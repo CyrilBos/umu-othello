@@ -1,18 +1,26 @@
 public class BetterCountingEvaluator implements OthelloEvaluator {
-    private static final int DIAGONAL_SCORE = -100;
-    private static final int BAD_C_SCORE = -1000;
-    private static final int INNER_BORDER_BASE_SCORE = -10;
+    private static final int BAD_C_SCORE = -50;
+    private static final int BAD_X_SCORE = -100;
+    private static final int STABLE_SCORE = 100;
     public static final int CORNER_SCORE = 1000;
 
     @Override
     public int evaluate(OthelloPosition position) {
-        int score = tokenHeuristic(position);
-        return score;
+        int boardScore = boardScore(position);
+        int playerMovesNumberScore = position.getMoves().size();
+
+        OthelloPosition opponentPosition = position.clone();
+        opponentPosition.playerToMove = false;
+        int opponentMovesNumberScore = position.getMoves().size();
+        if (position.toMove())
+            return boardScore + playerMovesNumberScore - opponentMovesNumberScore;
+        else
+            return boardScore - playerMovesNumberScore + opponentMovesNumberScore;
     }
 
     //TODO: pattern heuristic
 
-    private int tokenHeuristic(OthelloPosition position) {
+    private int boardScore(OthelloPosition position) {
         int whiteScore = 0;
         int blackScore = 0;
         for (int row = 1; row <= OthelloPosition.BOARD_SIZE; row++) {
@@ -29,7 +37,7 @@ public class BetterCountingEvaluator implements OthelloEvaluator {
         return whiteScore - blackScore;
     }
 
-    private boolean isABadCSquare(OthelloPosition position, int row, int column) {
+    private boolean isABadCDisc(OthelloPosition position, int row, int column) {
         //top left corner
         if (row == 1 && column == 2 || row == 2 && column == 1) {
             return position.board[1][1] == 'E';
@@ -49,6 +57,13 @@ public class BetterCountingEvaluator implements OthelloEvaluator {
         return false;
     }
 
+    private boolean isABadXDisc(OthelloPosition position, int row, int column) {
+        //from top left to bottom right diagonal, next to corners
+        return (row == column && (row == 2 || row == OthelloPosition.BOARD_SIZE - 1))
+                //from top right to bottom left diagonal, next to corners
+                || ((row == OthelloPosition.BOARD_SIZE - column + 1) && (row == 2 || row == OthelloPosition.BOARD_SIZE - 1));
+    }
+
     private int calcCellScore(OthelloPosition position, int row, int column) {
 
         //Tokens in corners are the most valuable as they can not be captured back by the opponent
@@ -58,11 +73,18 @@ public class BetterCountingEvaluator implements OthelloEvaluator {
             //TODO: see if other aligned corners are already captured, if so, very good move.
         }
         //Checks if a token is stable, i.e it can not be captured back. This is worth a lot but not as much as a corner
+        //TODO: debug is Token Stable. need to check triangles instead of every direction is not a possible move
         else if (isTokenStable(position, row, column)) {
-            return CORNER_SCORE / 2;
-        } else if (isABadCSquare(position, row, column)) {
+            return STABLE_SCORE / 2;
+        }
+        else if (isABadCDisc(position, row, column)) {
             return BAD_C_SCORE;
         }
+        else if (isABadXDisc(position, row, column)) {
+            return BAD_X_SCORE;
+        }
+        return 0;
+        /*
         //else if it is the top left to bottom right diagonal
         else if (row == column) {
             //the score is multiplied by the distance to the center
@@ -75,6 +97,7 @@ public class BetterCountingEvaluator implements OthelloEvaluator {
         } else {
             return 0;
         }
+        */
     }
 
     private int getDistanceToCenter(int row, int column, int boardLength) {
@@ -110,9 +133,6 @@ public class BetterCountingEvaluator implements OthelloEvaluator {
                     int searchRow = row + rowDifference;
                     int searchColumn = column + columnDifference;
                     if (position.isInsideBoard(searchRow, searchColumn) && position.board[searchRow][searchColumn] == 'E') {
-                        if (position.isAPossibleMove(opponentChar, row, column, rowDifference, columnDifference)) {
-                            return false;
-                        }
                     }
                 }
             }

@@ -235,71 +235,87 @@ public class OthelloPosition {
          * TODO: write the code for this method and whatever helper functions it
 		 * needs.
 		 */
-
-        //check if making a move on the board
-        if (!isInsideBoard(action.row) || !isInsideBoard(action.column)) {
-            throw new IllegalMoveException(action);
-        }
-
-        //check if making a move on an empty cell
-        char moveCell = board[action.row][action.column];
-        if (moveCell != 'E') {
-            throw new IllegalMoveException(action);
-        }
-        //legal action
         OthelloPosition movedPosition = this.clone();
 
-        char playerDisc = getPlayerDisc(playerToMove);
-        char opponentDisc = getPlayerDisc(!playerToMove);
+        if (!action.isPassMove()) {
+            //check if making a move on the board
+            if (!isInsideBoard(action.row) || !isInsideBoard(action.column)) {
+                throw new IllegalMoveException(action);
+            }
 
-        movedPosition.board[action.row][action.column] = playerDisc;
+            //check if making a move on an empty cell
+            char moveCell = board[action.row][action.column];
+            if (moveCell != 'E') {
+                throw new IllegalMoveException(action);
+            }
 
-        boolean discsWereConverted = false;
 
-        //for every direction, check if one there is one of the playerToMove Disc
-        for (int rowDifference = -1; rowDifference <= 1; rowDifference++) {
-            for (int columnDifference = -1; columnDifference <= 1; columnDifference++) {
-                if (!(rowDifference == 0 && columnDifference == 0)) {
-                    int startRow = action.row + rowDifference;
-                    int startColumn = action.column + columnDifference;
+            char playerDisc = getPlayerDisc(playerToMove);
+            char opponentDisc = getPlayerDisc(!playerToMove);
 
-                    if (isInsideBoard(startRow, startColumn)) {
-                        //save indexes values for later
-                        int currentRow = startRow;
-                        int currentColumn = startColumn;
+            movedPosition.board[action.row][action.column] = playerDisc;
 
-                        char startCell = board[currentRow][currentColumn];
-                        //if the cell is empty or if it is the playerToMove Disc, then there is nothing to do
-                        if (startCell != 'E' && startCell != playerDisc) {
-                            //else loop through all opponent Discs
-                            while (isInsideBoard(currentRow, currentColumn) && board[currentRow][currentColumn] == opponentDisc) {
-                                currentRow += rowDifference;
-                                currentColumn += columnDifference;
-                            }
-                            //if the last cell is the playerToMove Disc, convert all the Discs in between
-                            if (isInsideBoard(currentRow, currentColumn) && board[currentRow][currentColumn] == playerDisc) {
-                                int i = startRow;
-                                int j = startColumn;
-                                while (isInsideBoard(i, j) && board[i][j] == opponentDisc) {
-                                    discsWereConverted = true;
-                                    movedPosition.board[i][j] = playerDisc;
-                                    i += rowDifference;
-                                    j += columnDifference;
+            boolean discsWereConverted = false;
+
+            //for every direction, check if one there is one of the playerToMove Disc
+            for (int rowDifference = -1; rowDifference <= 1; rowDifference++) {
+                for (int columnDifference = -1; columnDifference <= 1; columnDifference++) {
+                    if (!(rowDifference == 0 && columnDifference == 0)) {
+                        int startRow = action.row + rowDifference;
+                        int startColumn = action.column + columnDifference;
+
+                        if (isInsideBoard(startRow, startColumn)) {
+                            //save indexes values for later
+                            int currentRow = startRow;
+                            int currentColumn = startColumn;
+
+                            char startCell = board[currentRow][currentColumn];
+                            //if the cell is empty or if it is the playerToMove Disc, then there is nothing to do
+                            if (startCell != 'E' && startCell != playerDisc) {
+                                //else loop through all opponent Discs
+                                while (isInsideBoard(currentRow, currentColumn) && board[currentRow][currentColumn] == opponentDisc) {
+                                    currentRow += rowDifference;
+                                    currentColumn += columnDifference;
                                 }
-                            }
-                            //else it is an empty cell, so not a possible move
+                                //if the last cell is the playerToMove Disc, convert all the Discs in between
+                                if (isInsideBoard(currentRow, currentColumn) && board[currentRow][currentColumn] == playerDisc) {
+                                    int i = startRow;
+                                    int j = startColumn;
+                                    while (isInsideBoard(i, j) && board[i][j] == opponentDisc) {
+                                        discsWereConverted = true;
+                                        movedPosition.board[i][j] = playerDisc;
+                                        i += rowDifference;
+                                        j += columnDifference;
+                                    }
+                                }
+                                //else it is an empty cell, so not a possible move
 
+                            }
                         }
                     }
                 }
             }
-        }
-        //Illegal move if nothing was converted
-        if (!discsWereConverted) {
-            throw new IllegalMoveException(action);
+            //Illegal move if nothing was converted
+            if (!discsWereConverted) {
+                throw new IllegalMoveException(action);
+            }
         }
         movedPosition.playerToMove = !playerToMove;
         return movedPosition;
+    }
+
+    boolean isGameEnded(OthelloAction action) throws IllegalMoveException {
+        if (!action.equals(new OthelloAction(0,0))) {
+            OthelloPosition newPosition = this.clone();
+            newPosition.makeMove(action);
+            if (newPosition.getMoves().isEmpty()) {
+                if (newPosition.makeMove(new OthelloAction(0, 0, true)).getMoves().isEmpty()) {
+                    return true;
+                }
+            }
+        }
+        return false;
+
     }
 
     /**
