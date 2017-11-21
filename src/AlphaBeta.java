@@ -19,6 +19,13 @@ public class AlphaBeta implements OthelloAlgorithm {
         this.maxDepth = depth;
     }
 
+    /**
+     * Implements AlphaBeta, calling MaxValue() or MinValue() depending on which player the AI is playing.
+     * @param position Starting position
+     * @return Best OthelloAction possible found during the search
+     * @throws IllegalMoveException Thrown if an illegal move is made during the search
+     * @throws OutOfTimeException Thrown if the search can not continue under the time limit
+     */
     @Override
     public OthelloAction evaluate(OthelloPosition position) throws IllegalMoveException, OutOfTimeException {
         int alpha = Integer.MIN_VALUE, beta = Integer.MAX_VALUE;
@@ -30,11 +37,103 @@ public class AlphaBeta implements OthelloAlgorithm {
     }
 
 
+
+    /**
+     * Implements Max side of AlphaBeta search.
+     *
+     */
+    private OthelloAction maxValue(OthelloPosition position, int alpha, int beta, int depth) throws IllegalMoveException, OutOfTimeException {
+        LinkedList<OthelloAction> moves = position.getMoves();
+        //
+        if (depth == 0) {
+            return maxDepthScore(position);
+        }
+        //if a leaf position is reached
+        else if (moves.isEmpty()) {
+            return leafScore(position);
+        } else {
+            int value = Integer.MIN_VALUE;
+
+            OthelloAction bestMove = new OthelloAction(0, 0);
+            for (OthelloAction move : moves) {
+                //check time every move made
+                if (System.currentTimeMillis() > timeLimitStamp)
+                    throw new OutOfTimeException();
+
+                OthelloPosition next_position = position.makeMove(move);
+                OthelloAction moveResult = minValue(next_position, alpha, beta, depth - 1);
+                //replace the bestMove if this one is better
+                if (moveResult.getValue() > value) {
+                    value = moveResult.getValue();
+                    move.value = value;
+                    bestMove = move;
+                }
+                //a move not as good as the best of this depth: cut the search
+                if (value >= beta) {
+                    return move;
+                }
+
+                alpha = Integer.max(alpha, value);
+            }
+            return bestMove;
+        }
+    }
+
+
+    /**
+     * Implements Min side of AlphaBeta search.
+     */
+    private OthelloAction minValue(OthelloPosition position, int alpha, int beta, int depth) throws IllegalMoveException, OutOfTimeException {
+        LinkedList<OthelloAction> moves = position.getMoves();
+        if (depth == 0) {
+            return maxDepthScore(position);
+        }
+        else if (moves.isEmpty()) {
+            return leafScore(position);
+        } else {
+
+            int value = Integer.MAX_VALUE;
+
+            OthelloAction bestMove = new OthelloAction(0, 0);
+            for (OthelloAction move : moves) {
+                if (System.currentTimeMillis() > timeLimitStamp)
+                    throw new OutOfTimeException();
+
+                OthelloPosition nextPosition = position.makeMove(move);
+                OthelloAction moveResult = maxValue(nextPosition, alpha, beta, depth - 1);
+                if (moveResult.getValue() < value) {
+                    value = moveResult.getValue();
+                    move.value = value;
+                    bestMove = move;
+                }
+
+                if (value <= alpha) {
+                    move.value = value;
+                    return move;
+                }
+
+                beta = Integer.min(beta, value);
+            }
+            return bestMove;
+        }
+    }
+
+    /**
+     * factorizes the code when Min or Max goes at maximum depth.
+     * @param position current position at max depth
+     * @return pass OthelloAction which value is infinity or the position score
+     */
+    private OthelloAction maxDepthScore(OthelloPosition position) {
+        OthelloAction maxDepthMove = new OthelloAction(0, 0);
+        maxDepthMove.value = this.evaluator.evaluate(position);
+        return maxDepthMove;
+    }
+
     /**
      * Checks a leaf position to return an infinity value if the game is won. Else it evaluates normally the position.
-     * @param position
-     * @return
-     * @throws IllegalMoveException
+     * @param position leaf position without being at max depth
+     * @return pass OthelloAction which value is infinity or the position score
+     * @throws IllegalMoveException to satisfy makeMove() prototype, making a pass move just to switch player
      */
     private OthelloAction leafScore(OthelloPosition position) throws IllegalMoveException {
         OthelloAction leafScore = new OthelloAction(0,0, true);
@@ -64,80 +163,5 @@ public class AlphaBeta implements OthelloAlgorithm {
             leafScore.setValue(evaluator.evaluate(position));
         }
         return leafScore;
-    }
-
-
-    private OthelloAction maxValue(OthelloPosition position, int alpha, int beta, int depth) throws IllegalMoveException, OutOfTimeException {
-        LinkedList<OthelloAction> moves = position.getMoves();
-        //
-        if (depth == 0) {
-            return maxDepthScore(position);
-        }
-        //if a leaf position is reached
-        else if (moves.isEmpty()) {
-            return leafScore(position);
-        } else {
-            int value = Integer.MIN_VALUE;
-            OthelloAction bestMove = new OthelloAction(0, 0);
-            for (OthelloAction move : moves) {
-                if (System.currentTimeMillis() > timeLimitStamp)
-                    throw new OutOfTimeException();
-
-                OthelloPosition next_position = position.makeMove(move);
-                OthelloAction moveResult = minValue(next_position, alpha, beta, depth - 1);
-                if (moveResult.getValue() > value) {
-                    value = moveResult.getValue();
-                    move.value = value;
-                    bestMove = move;
-                }
-                if (value >= beta) {
-                    return move;
-                }
-
-                alpha = Integer.max(alpha, value);
-            }
-            return bestMove;
-        }
-    }
-
-    private OthelloAction maxDepthScore(OthelloPosition position) {
-        OthelloAction maxDepthMove = new OthelloAction(0, 0);
-        maxDepthMove.value = this.evaluator.evaluate(position);
-        return maxDepthMove;
-    }
-
-    private OthelloAction minValue(OthelloPosition position, int alpha, int beta, int depth) throws IllegalMoveException, OutOfTimeException {
-        LinkedList<OthelloAction> moves = position.getMoves();
-        if (depth == 0) {
-            return maxDepthScore(position);
-        }
-        //if a leaf position is reached
-        else if (moves.isEmpty()) {
-            return leafScore(position);
-        } else {
-
-            int value = Integer.MAX_VALUE;
-            OthelloAction bestMove = new OthelloAction(0, 0);
-            for (OthelloAction move : moves) {
-                if (System.currentTimeMillis() > timeLimitStamp)
-                    throw new OutOfTimeException();
-
-                OthelloPosition nextPosition = position.makeMove(move);
-                OthelloAction moveResult = maxValue(nextPosition, alpha, beta, depth - 1);
-                if (moveResult.getValue() < value) {
-                    value = moveResult.getValue();
-                    move.value = value;
-                    bestMove = move;
-                }
-
-                if (value <= alpha) {
-                    move.value = value;
-                    return move;
-                }
-
-                beta = Integer.min(beta, value);
-            }
-            return bestMove;
-        }
     }
 }
