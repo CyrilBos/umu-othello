@@ -1,9 +1,14 @@
 import java.util.LinkedList;
 
+/**
+ * Class that implements the Alpha Beta algorithm in a recursive way. It stops by throwing a OutOfTimeException when
+ * reaching timeLimitStamp.
+ */
 public class AlphaBeta implements OthelloAlgorithm {
     private OthelloEvaluator evaluator;
-    private int maxDepth;
+    private int searchDepth;
     private long timeLimitStamp;
+
 
     public AlphaBeta(long timeLimitStamp) {
         this.timeLimitStamp = timeLimitStamp;
@@ -16,7 +21,7 @@ public class AlphaBeta implements OthelloAlgorithm {
 
     @Override
     public void setSearchDepth(int depth) {
-        this.maxDepth = depth;
+        this.searchDepth = depth;
     }
 
     /**
@@ -30,9 +35,9 @@ public class AlphaBeta implements OthelloAlgorithm {
     public OthelloAction evaluate(OthelloPosition position) throws IllegalMoveException, OutOfTimeException {
         int alpha = Integer.MIN_VALUE, beta = Integer.MAX_VALUE;
         if (position.playerToMove) {
-            return this.maxValue(position, alpha, beta, this.maxDepth);
+            return this.maxValue(position, alpha, beta, this.searchDepth);
         } else {
-            return this.minValue(position, alpha, beta, this.maxDepth);
+            return this.minValue(position, alpha, beta, this.searchDepth);
         }
     }
 
@@ -44,11 +49,11 @@ public class AlphaBeta implements OthelloAlgorithm {
      */
     private OthelloAction maxValue(OthelloPosition position, int alpha, int beta, int depth) throws IllegalMoveException, OutOfTimeException {
         LinkedList<OthelloAction> moves = position.getMoves();
-        //
+        //reached max depth
         if (depth == 0) {
             return maxDepthScore(position);
         }
-        //if a leaf position is reached
+        //reached leaf position
         else if (moves.isEmpty()) {
             return leafScore(position);
         } else {
@@ -68,7 +73,7 @@ public class AlphaBeta implements OthelloAlgorithm {
                     move.value = value;
                     bestMove = move;
                 }
-                //a move not as good as the best of this depth: cut the search
+                //the new move is not as good as the best of this depth: cut the search
                 if (value >= beta) {
                     return move;
                 }
