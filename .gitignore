@@ -1,4 +1,7 @@
-.idea
+.idea/*
+!idea/runConfigurations/
+!idea/runConfigurations/*
+
 
 # Compiled class file
 *.class
