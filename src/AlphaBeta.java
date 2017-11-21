@@ -20,7 +20,7 @@ public class AlphaBeta implements OthelloAlgorithm {
     }
 
     @Override
-    public OthelloAction evaluate(OthelloPosition position) throws IllegalMoveException {
+    public OthelloAction evaluate(OthelloPosition position) throws IllegalMoveException, OutOfTimeException {
         int alpha = Integer.MIN_VALUE, beta = Integer.MAX_VALUE;
         if (position.playerToMove) {
             return this.maxValue(position, alpha, beta, this.maxDepth);
@@ -61,7 +61,7 @@ public class AlphaBeta implements OthelloAlgorithm {
     }
 
 
-    private OthelloAction maxValue(OthelloPosition position, int alpha, int beta, int depth) throws IllegalMoveException {
+    private OthelloAction maxValue(OthelloPosition position, int alpha, int beta, int depth) throws IllegalMoveException, OutOfTimeException {
         LinkedList<OthelloAction> moves = position.getMoves();
         if (depth == 0) {
             return maxDepthScore(position);
@@ -74,7 +74,7 @@ public class AlphaBeta implements OthelloAlgorithm {
             OthelloAction bestMove = new OthelloAction(0, 0);
             for (OthelloAction move : moves) {
                 if (System.currentTimeMillis() > timeLimitStamp)
-                    return bestMove;
+                    throw new OutOfTimeException();
 
                 OthelloPosition next_position = position.makeMove(move);
                 OthelloAction moveResult = minValue(next_position, alpha, beta, depth - 1);
@@ -99,7 +99,7 @@ public class AlphaBeta implements OthelloAlgorithm {
         return maxDepthMove;
     }
 
-    private OthelloAction minValue(OthelloPosition position, int alpha, int beta, int depth) throws IllegalMoveException {
+    private OthelloAction minValue(OthelloPosition position, int alpha, int beta, int depth) throws IllegalMoveException, OutOfTimeException {
         LinkedList<OthelloAction> moves = position.getMoves();
         if (depth == 0) {
             return maxDepthScore(position);
@@ -113,7 +113,7 @@ public class AlphaBeta implements OthelloAlgorithm {
             OthelloAction bestMove = new OthelloAction(0, 0);
             for (OthelloAction move : moves) {
                 if (System.currentTimeMillis() > timeLimitStamp)
-                    return bestMove;
+                    throw new OutOfTimeException();
 
                 OthelloPosition nextPosition = position.makeMove(move);
                 OthelloAction moveResult = maxValue(nextPosition, alpha, beta, depth - 1);

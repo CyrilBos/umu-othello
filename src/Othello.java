@@ -18,10 +18,14 @@ public class Othello {
             //search again with an incremented depth to find a supposedly better move
             moveChooser.setSearchDepth(depth++);
             //TODO: try-catch
-            OthelloAction newMove = moveChooser.evaluate(position);
-            //no move possible
-            if(!newMove.equals(new OthelloAction(0,0))) {
-                chosenMove = newMove;
+            try {
+                OthelloAction newMove = moveChooser.evaluate(position);
+                //no move possible
+                if (!newMove.equals(new OthelloAction(0, 0))) {
+                    chosenMove = newMove;
+                }
+            } catch (OutOfTimeException exception) {
+
             }
         }
         if (chosenMove.equals(new OthelloAction(0,0)))
