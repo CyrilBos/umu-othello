@@ -17,6 +17,7 @@ public class Othello {
         while (System.currentTimeMillis() < timeLimitStamp && !position.isGameEnded(chosenMove)) {
             //search again with an incremented depth to find a supposedly better move
             moveChooser.setSearchDepth(depth++);
+            //TODO: try-catch
             OthelloAction newMove = moveChooser.evaluate(position);
             //no move possible
             if(!newMove.equals(new OthelloAction(0,0))) {
