@@ -15,7 +15,11 @@ public class SelfPlayingOthello {
         do {
             System.out.println("Current player: " + position.getPlayerDisc(position.playerToMove));
             position.illustrate();
-            position = position.makeMove(moveChooser.evaluate(position));
+            try {
+                position = position.makeMove(moveChooser.evaluate(position));
+            } catch (OutOfTimeException e) {
+                e.printStackTrace();
+            }
             moves = position.getMoves();
         } while (!moves.isEmpty());
 

@@ -13,11 +13,18 @@ public class FixedDepthOthello {
         moveChooser.setEvaluator(evaluator);
         OthelloAction chosenMove = new OthelloAction(0,0);
 
+        try {
         for (int depth = 1; depth < 10 && !position.isGameEnded(chosenMove); depth++){
             moveChooser.setSearchDepth(depth);
-            chosenMove = moveChooser.evaluate(position);
-            System.out.println("depth = " + depth + " time = " + (System.currentTimeMillis() / 1000 - start));
-            chosenMove.pprint();
+
+                chosenMove = moveChooser.evaluate(position);
+                System.out.println("depth = " + depth + " time = " + (System.currentTimeMillis() / 1000 - start));
+                chosenMove.pprint();
+
+
+        }
+        } catch (OutOfTimeException e) {
+            e.printStackTrace();
         }
         chosenMove.pprint();
         //position.makeMove(chosenMove).illustrate();
