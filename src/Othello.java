@@ -13,21 +13,25 @@ public class Othello {
 
         int depth = 0;
         OthelloAction chosenMove = new OthelloAction(0,0);
+
+        boolean canNotMove = false;
         //Stop the search if the remaining time is inferior to the last search time
-        while (System.currentTimeMillis() < timeLimitStamp && !position.isGameEnded(chosenMove)) {
+        while (System.currentTimeMillis() < timeLimitStamp) {
             //search again with an incremented depth to find a supposedly better move
             moveChooser.setSearchDepth(depth++);
-            //TODO: try-catch
             try {
                 OthelloAction newMove = moveChooser.evaluate(position);
-                //no move possible
+                //may return a blank action if there is no move possible
                 if (!newMove.equals(new OthelloAction(0, 0))) {
                     chosenMove = newMove;
                 }
-            } catch (OutOfTimeException exception) {
 
+            } catch (OutOfTimeException exception) {
+                //time is up
             }
+
         }
+        //no move possible at all: play a pass move
         if (chosenMove.equals(new OthelloAction(0,0)))
             chosenMove = new OthelloAction(0,0,true);
         chosenMove.print();

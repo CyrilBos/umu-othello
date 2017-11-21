@@ -30,6 +30,12 @@ public class AlphaBeta implements OthelloAlgorithm {
     }
 
 
+    /**
+     * Checks a leaf position to return an infinity value if the game is won. Else it evaluates normally the position.
+     * @param position
+     * @return
+     * @throws IllegalMoveException
+     */
     private OthelloAction leafScore(OthelloPosition position) throws IllegalMoveException {
         OthelloAction leafScore = new OthelloAction(0,0, true);
         //switch to the opponent turn
@@ -63,6 +69,7 @@ public class AlphaBeta implements OthelloAlgorithm {
 
     private OthelloAction maxValue(OthelloPosition position, int alpha, int beta, int depth) throws IllegalMoveException, OutOfTimeException {
         LinkedList<OthelloAction> moves = position.getMoves();
+        //
         if (depth == 0) {
             return maxDepthScore(position);
         }

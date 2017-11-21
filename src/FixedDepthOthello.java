@@ -11,18 +11,16 @@ public class FixedDepthOthello {
         OthelloAlgorithm moveChooser = new AlphaBeta(timeLimitStamp);
         OthelloEvaluator evaluator = new BetterCountingEvaluator();
         moveChooser.setEvaluator(evaluator);
-        OthelloAction chosenMove = new OthelloAction(0,0);
+        OthelloAction chosenMove = new OthelloAction(0, 0);
 
         try {
-        for (int depth = 1; depth < 10 && !position.isGameEnded(chosenMove); depth++){
-            moveChooser.setSearchDepth(depth);
+            for (int depth = 1; depth < 10 && !position.isGameEnded(chosenMove); depth++) {
+                moveChooser.setSearchDepth(depth);
 
                 chosenMove = moveChooser.evaluate(position);
                 System.out.println("depth = " + depth + " time = " + (System.currentTimeMillis() / 1000 - start));
                 chosenMove.pprint();
-
-
-        }
+            }
         } catch (OutOfTimeException e) {
             e.printStackTrace();
         }
