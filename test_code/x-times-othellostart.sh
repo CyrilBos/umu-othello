@@ -92,7 +92,7 @@ do
             blackTtot=$(($blackTtot + $blackT))
             if [ "$blackT" -gt "$blackTmax" ]
             then
-                blackTmax=$blackT
+                blackTmax= $blackT
             fi
         fi
 

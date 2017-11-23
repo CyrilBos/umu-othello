@@ -1,7 +1,11 @@
 /**
- * Class that implements a board evaluator. Its heuristic is mainly based on crucial cells:
+ * Class that implements a board evaluator. Its heuristic is based on the number of possible moves and
+ * on an evaluation of crucial discs:
  * - the corners, that are the most valuable
- * - the
+ * - the stable discs, that are very valuable (they can not be taken back)
+ * - the C discs, that
+ * - the X discs,
+ * - the other discs are considered with a value of 1.
  */
 public class BetterCountingEvaluator implements OthelloEvaluator {
     private static final int BAD_C_SCORE = -12;
@@ -108,7 +112,7 @@ public class BetterCountingEvaluator implements OthelloEvaluator {
 
 
     /**
-     * returns if a disc is at one of the C positions
+     * returns whether if a disc is at one of the C positions.
      */
     private boolean isABadCDisc(OthelloPosition position, int row, int column) {
         //top left corner
@@ -131,7 +135,7 @@ public class BetterCountingEvaluator implements OthelloEvaluator {
     }
 
     /**
-     * returns if a disc is at one of the X positions
+     * returns whether if a disc is at one of the X positions.
      */
     private boolean isABadXDisc(OthelloPosition position, int row, int column) {
         //from top left to bottom right diagonal, next to corners

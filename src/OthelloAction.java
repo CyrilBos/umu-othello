@@ -54,14 +54,12 @@ public class OthelloAction {
 		}
 	}
 
+
 	public boolean equals(Object other) {
 		if ( this == other ) return true;
 		if (other == null ) return false;
 		if ( !(other instanceof OthelloAction) ) return false;
-		//Alternative to the above line :
-		//if ( aThat == null || aThat.getClass() != this.getClass() ) return false;
 
-		//cast to native object is now safe
 		OthelloAction other_action = (OthelloAction) other;
 
 		return other_action.row == this.row && other_action.column == this.column;
