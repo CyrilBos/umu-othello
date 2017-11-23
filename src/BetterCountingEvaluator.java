@@ -1,8 +1,13 @@
+/**
+ * Class that implements a board evaluator. Its heuristic is mainly based on crucial cells:
+ * - the corners, that are the most valuable
+ * - the
+ */
 public class BetterCountingEvaluator implements OthelloEvaluator {
     private static final int BAD_C_SCORE = -50;
     private static final int BAD_X_SCORE = -100;
     private static final int STABLE_SCORE = 100;
-    public static final int CORNER_SCORE = 1000;
+    private static final int CORNER_SCORE = 1000;
 
     @Override
     public int evaluate(OthelloPosition position) {
@@ -37,6 +42,67 @@ public class BetterCountingEvaluator implements OthelloEvaluator {
         return whiteScore - blackScore;
     }
 
+
+    private int calcCellScore(OthelloPosition position, int row, int column) {
+
+        //Tokens in corners are the most valuable as they can not be captured back by the opponent
+        if (row == 1 && (column == 1 || column == OthelloPosition.BOARD_SIZE)
+                || row == OthelloPosition.BOARD_SIZE && (column == 1 || column == OthelloPosition.BOARD_SIZE)) {
+            return CORNER_SCORE;
+        }
+        //Checks if a token is stable, i.e it can not be captured back. This is worth a lot but not as much as a corner
+        else if (isTokenStable(position, row, column)) {
+            return STABLE_SCORE;
+        }
+        else if (isABadCDisc(position, row, column)) {
+            return BAD_C_SCORE;
+        }
+        else if (isABadXDisc(position, row, column)) {
+            return BAD_X_SCORE;
+        }
+        return 0;
+    }
+
+
+    /**
+     * TODO: move to OthelloPosition?
+     * Checks if the disc at [row][column] is stable, i.e in all directions opposite to adjacent empty cells
+     * there are only player discs until the end of the board.
+     */
+    private boolean isTokenStable(OthelloPosition position, int row, int column) {
+        char playerDisc = position.board[row][column];
+        char opponentDisc = 'W';
+
+        if (playerDisc == 'W')
+            opponentDisc = 'B';
+
+        for (int rowDifference = -1; rowDifference <= 1; rowDifference++) {
+            for (int columnDifference = -1; columnDifference <= 1; columnDifference++) {
+                if (!(columnDifference == 0 && rowDifference == 0)) {
+                    int searchRow = row + rowDifference;
+                    int searchColumn = column + columnDifference;
+                    //look for a direction with an empty cell
+                    if (position.isInsideBoard(searchRow, searchColumn) && position.board[searchRow][searchColumn] == 'E') {
+                        int[] oppositeDirection = position.getOppositeDirection(rowDifference, columnDifference);
+                        //loop through
+                        while (position.isInsideBoard(searchRow, searchColumn) && position.board[searchRow][searchColumn] == playerDisc) {
+                            searchRow += oppositeDirection[0];
+                            searchColumn += oppositeDirection[1];
+                        }
+                        //in the opposite direction, if there is an opponent disc or an empty cell which might later on
+                        // be captured by the opponent, then this is not a stable token.
+                        if (position.isInsideBoard(searchRow, searchColumn) && position.board[searchRow][searchColumn] != playerDisc)
+                            return false;
+
+                    }
+                }
+            }
+        }
+        //the token is surrounded by player discs so it is stable
+        return true;
+    }
+
+
     private boolean isABadCDisc(OthelloPosition position, int row, int column) {
         //top left corner
         if (row == 1 && column == 2 || row == 2 && column == 1) {
@@ -64,87 +130,7 @@ public class BetterCountingEvaluator implements OthelloEvaluator {
                 || ((row == OthelloPosition.BOARD_SIZE - column + 1) && (row == 2 || row == OthelloPosition.BOARD_SIZE - 1));
     }
 
-    private int calcCellScore(OthelloPosition position, int row, int column) {
 
-        //Tokens in corners are the most valuable as they can not be captured back by the opponent
-        if (row == 1 && (column == 1 || column == OthelloPosition.BOARD_SIZE)
-                || row == OthelloPosition.BOARD_SIZE && (column == 1 || column == OthelloPosition.BOARD_SIZE)) {
-            return CORNER_SCORE;
-            //TODO: see if other aligned corners are already captured, if so, very good move.
-        }
-        //Checks if a token is stable, i.e it can not be captured back. This is worth a lot but not as much as a corner
-        //TODO: debug is Token Stable. need to check triangles instead of every direction is not a possible move
-        else if (isTokenStable(position, row, column)) {
-            return STABLE_SCORE / 2;
-        }
-        else if (isABadCDisc(position, row, column)) {
-            return BAD_C_SCORE;
-        }
-        else if (isABadXDisc(position, row, column)) {
-            return BAD_X_SCORE;
-        }
-        return 0;
-        /*
-        //else if it is the top left to bottom right diagonal
-        else if (row == column) {
-            //the score is multiplied by the distance to the center
-            return DIAGONAL_SCORE * getDistanceToCenter(row, OthelloPosition.BOARD_SIZE / 2);
 
-        }
-        // else if it is the top right to bottom left diagonal
-        else if (row == OthelloPosition.BOARD_SIZE - column + 1) { // +1 because first board index is 1
-            return DIAGONAL_SCORE * getDistanceToCenter(row, OthelloPosition.BOARD_SIZE / 2);
-        } else {
-            return 0;
-        }
-        */
-    }
 
-    private int getDistanceToCenter(int row, int column, int boardLength) {
-        return getDistanceToCenter(row, boardLength) + getDistanceToCenter(column, boardLength);
-    }
-
-    private int getDistanceToCenter(int index, int boardLength) {
-        if (index <= boardLength / 2)
-            return boardLength / 2 - index;
-        else
-            return index - (boardLength / 2 + 1);
-    }
-
-    /**
-     * TODO: move to OthelloPosition?
-     * Checks if position.board[row][column] is stable, i.e there is no possible moves for the other player around it in
-     * every direction
-     *
-     * @param position
-     * @param row
-     * @param column
-     * @return
-     */
-    private boolean isTokenStable(OthelloPosition position, int row, int column) {
-        char opponentChar = 'W';
-
-        if (position.board[row][column] == 'W')
-            opponentChar = 'B';
-
-        for (int rowDifference = -1; rowDifference <= 1; rowDifference++) {
-            for (int columnDifference = -1; columnDifference <= 1; columnDifference++) {
-                if (!(columnDifference == 0 && rowDifference == 0)) {
-                    int searchRow = row + rowDifference;
-                    int searchColumn = column + columnDifference;
-                    if (position.isInsideBoard(searchRow, searchColumn) && position.board[searchRow][searchColumn] == 'E') {
-                    }
-                }
-            }
-        }
-        return true;
-    }
-
-    private int stabilityHeuristic() {
-        return 0;
-    }
-
-    private int parityHeuristic() {
-        return 0;
-    }
 }

@@ -159,7 +159,7 @@ public class OthelloPosition {
      * Method that returns an array corresponding to the opposite direction, given in and given by a difference in row
      * index and a difference in column index.
      */
-    private int[] getOppositeDirection(int rowDifference, int columnDifference) {
+    int[] getOppositeDirection(int rowDifference, int columnDifference) {
         int[] opposite = new int[2];
         opposite[0] = OPPOSITE_DIRECTION_VALUES[rowDifference + 1];
         opposite[1] = OPPOSITE_DIRECTION_VALUES[columnDifference + 1];
