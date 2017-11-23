@@ -14,7 +14,6 @@ public class Othello {
         int depth = 0;
         OthelloAction chosenMove = new OthelloAction(0,0);
 
-        boolean canNotMove = false;
         //Stop the search if the remaining time is inferior to the last search time
         while (System.currentTimeMillis() < timeLimitStamp) {
             //search again with an incremented depth to find a supposedly better move
