@@ -1,6 +1,3 @@
-/**
- * Created by cyrbos on 11/19/17.
- */
 public class FixedDepthOthello {
     public static void main(String[] args) throws IllegalMoveException {
         long timeLimitStamp = Long.MAX_VALUE;
@@ -9,7 +6,7 @@ public class FixedDepthOthello {
         OthelloPosition position = new OthelloPosition(positionString);
         position.illustrate();
         OthelloAlgorithm moveChooser = new AlphaBeta(timeLimitStamp);
-        OthelloEvaluator evaluator = new BetterCountingEvaluator();
+        OthelloEvaluator evaluator = new BoardEvaluator();
         moveChooser.setEvaluator(evaluator);
         OthelloAction chosenMove = new OthelloAction(0, 0);
 

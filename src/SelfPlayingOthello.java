@@ -6,7 +6,7 @@ public class SelfPlayingOthello {
         LinkedList<OthelloAction> moves;
         OthelloAlgorithm moveChooser = new AlphaBeta(1);
         //OthelloEvaluator evaluator = new NaiveCountingEvaluator();
-        OthelloEvaluator evaluator = new BetterCountingEvaluator();
+        OthelloEvaluator evaluator = new BoardEvaluator();
         moveChooser.setEvaluator(evaluator);
 
         moveChooser.setSearchDepth(7);

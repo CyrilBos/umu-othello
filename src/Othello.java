@@ -1,3 +1,7 @@
+/**
+ * Main class that parses the arguments and prints the choosen move.
+ * Manages the iterative deepening search through an exception catch.
+ */
 public class Othello {
     public static void main(String[] args) throws IllegalMoveException {
         //The timestamp in miliseconds corresponding to the end of the turn
@@ -8,7 +12,7 @@ public class Othello {
         OthelloPosition position = new OthelloPosition(positionString);
 
         OthelloAlgorithm moveChooser = new AlphaBeta(timeLimitStamp);
-        OthelloEvaluator evaluator = new BetterCountingEvaluator();
+        OthelloEvaluator evaluator = new BoardEvaluator();
         moveChooser.setEvaluator(evaluator);
 
         int depth = 0;
