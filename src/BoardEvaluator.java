@@ -7,7 +7,7 @@
  * - the X discs,
  * - the other discs are considered with a value of 1.
  */
-public class BetterCountingEvaluator implements OthelloEvaluator {
+public class BoardEvaluator implements OthelloEvaluator {
     private static final int BAD_C_SCORE = -12;
     private static final int BAD_X_SCORE = -22;
     private static final int STABLE_SCORE = 12;
