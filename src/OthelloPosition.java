@@ -98,12 +98,6 @@ public class OthelloPosition {
      */
 
     public LinkedList<OthelloAction> getMoves() {
-
-		/*
-         * TODO: write the code for this method and whatever helper methods it
-		 * needs
-		 */
-
         LinkedList<OthelloAction> moves = new LinkedList<>();
 
         char playerDisc = getPlayerDisc(playerToMove);
@@ -183,7 +177,7 @@ public class OthelloPosition {
      * [row,column]. This method calculates the opposite direction and finds if there is a player token in that direction,
      * making it a valid move.
      */
-    boolean isAPossibleMove(char playerChar, int row, int column, int rowDifference, int columnDifference) {
+    private boolean isAPossibleMove(char playerChar, int row, int column, int rowDifference, int columnDifference) {
         //get the opposite direction to the current position
         int[] oppositeDirections = getOppositeDirection(rowDifference, columnDifference);
 
@@ -226,11 +220,6 @@ public class OthelloPosition {
      */
     public OthelloPosition makeMove(OthelloAction action)
             throws IllegalMoveException {
-
-		/*
-         * TODO: write the code for this method and whatever helper functions it
-		 * needs.
-		 */
         OthelloPosition movedPosition = this.clone();
 
         if (!action.isPassMove()) {
