@@ -63,10 +63,10 @@ public class BoardEvaluator implements OthelloEvaluator {
         else if (isTokenStable(position, row, column)) {
             return STABLE_SCORE;
         }
-        else if (isABadCDisc(position, row, column)) {
+        else if (isACDisc(row, column)) {
             return BAD_C_SCORE;
         }
-        else if (isABadXDisc(position, row, column)) {
+        else if (isAXDisc(row, column)) {
             return BAD_X_SCORE;
         }
         return 1;
@@ -106,7 +106,7 @@ public class BoardEvaluator implements OthelloEvaluator {
                 }
             }
         }
-        //the token is surrounded by player discs so it is stable
+        //the token is stable
         return true;
     }
 
@@ -114,22 +114,22 @@ public class BoardEvaluator implements OthelloEvaluator {
     /**
      * returns whether if a disc is at one of the C positions.
      */
-    private boolean isABadCDisc(OthelloPosition position, int row, int column) {
+    private boolean isACDisc(int row, int column) {
         //top left corner
         if (row == 1 && column == 2 || row == 2 && column == 1) {
-            return position.board[1][1] == 'E';
+            return true;
             // bottom right corner
         } else if (row == OthelloPosition.BOARD_SIZE && column == OthelloPosition.BOARD_SIZE - 1
                 || row == OthelloPosition.BOARD_SIZE - 1 && column == OthelloPosition.BOARD_SIZE) {
-            return position.board[OthelloPosition.BOARD_SIZE][OthelloPosition.BOARD_SIZE] == 'E';
+            return true;
             //bottom left corner
         } else if (row == OthelloPosition.BOARD_SIZE - 1 && column == 1
                 || row == OthelloPosition.BOARD_SIZE && column == 2 ) {
-            return position.board[OthelloPosition.BOARD_SIZE][1] == 'E';
+            return true;
             //top right corner
         } else if (row == 1 && column == OthelloPosition.BOARD_SIZE - 1
                 || row == 2 && column == OthelloPosition.BOARD_SIZE) {
-            return position.board[1][OthelloPosition.BOARD_SIZE] == 'E';
+            return true;
         }
         return false;
     }
@@ -137,14 +137,10 @@ public class BoardEvaluator implements OthelloEvaluator {
     /**
      * returns whether if a disc is at one of the X positions.
      */
-    private boolean isABadXDisc(OthelloPosition position, int row, int column) {
+    private boolean isAXDisc(int row, int column) {
         //from top left to bottom right diagonal, next to corners
         return (row == column && (row == 2 || row == OthelloPosition.BOARD_SIZE - 1))
                 //from top right to bottom left diagonal, next to corners
                 || ((row == OthelloPosition.BOARD_SIZE - column + 1) && (row == 2 || row == OthelloPosition.BOARD_SIZE - 1));
     }
-
-
-
-
 }
